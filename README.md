@@ -1,10 +1,18 @@
 # three-spatial-hash-grid
 
 `three-spacial-hash-grid` is a two-dimensional (!) spatial hash grid for [three.js](https://threejs.org/).
+Heavily inspired by:
+
+-   ["Spatial Hash Grids & Tales from Game Development"](https://www.youtube.com/watch?v=sx4IIQL0x7c)
+-   ["How I Optimized My JavaScript Project (Complete Walkthrough) | Faster Spatial Hash Grids"](https://www.youtube.com/watch?v=oewDaISQpw0)
+
+[![PR Checker](https://github.com/andrewisen-tikab/three-spatial-hash-grid/actions/workflows/pr.yml/badge.svg)](https://github.com/andrewisen-tikab/three-spatial-hash-grid/actions/workflows/pr.yml)
+
+[![Release](https://github.com/andrewisen-tikab/three-spatial-hash-grid/actions/workflows/release.yml/badge.svg)](https://github.com/andrewisen-tikab/three-spatial-hash-grid/actions/workflows/release.yml)
 
 ## Example
 
-[todo](todo)
+[https://andrewisen-tikab.github.io/three-spatial-hash-grid/example/](https://andrewisen-tikab.github.io/three-spatial-hash-grid/example/)
 
 ## Usage
 
@@ -26,6 +34,12 @@ The min/max the grid will operate on. I.e. if the world goes from `-1000, -1000`
 > dimensions
 
 How **many** cells along each dimensional axis. I.e. if the world is 100 units wide and we have 5 cells, then each cell will span `100/5=20 units`.
+
+## Docs
+
+Auto-generated docs can be found here:
+
+[https://andrewisen-tikab.github.io/three-spatial-hash-grid/docs/](https://andrewisen-tikab.github.io/three-spatial-hash-grid/docs/)
 
 ## Remarks
 
