@@ -37,7 +37,7 @@ const example = (): void => {
         cellSizeX: 1,
         cellSizeZ: 1,
         cubeSize: 1,
-        numOfCubes: 20,
+        numOfCubes: 40,
         x: 0,
         z: 0,
         status: 'N/A',
