@@ -9,6 +9,9 @@ import CameraControls from 'camera-controls';
 
 CameraControls.install({ THREE: THREE });
 
+const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true });
+const checkMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, flatShading: true });
+
 /**
  * Example of how to use the `ThreeSpatialHashGrid` class.
  */
@@ -18,6 +21,8 @@ const example = (): void => {
     let cameraControls: CameraControls;
     let scene: THREE.Scene;
     let group: THREE.Group;
+    let cubes: THREE.Group = new THREE.Group();
+
     let renderer: THREE.WebGLRenderer;
     let positionHelper: THREE.Mesh;
 
@@ -27,12 +32,12 @@ const example = (): void => {
     let checkFolder: GUI;
 
     const params = {
-        boundsX: 8,
-        boundsZ: 8,
+        boundsX: 16,
+        boundsZ: 16,
         cellSizeX: 1,
         cellSizeZ: 1,
         cubeSize: 1,
-        numOfCubes: 10,
+        numOfCubes: 20,
         x: 0,
         z: 0,
         status: 'N/A',
@@ -126,13 +131,26 @@ const example = (): void => {
      */
     const check = () => {
         const { x, z } = params;
-        const result = spatialHashGrid.getNearbyObjects(new THREE.Vector3(x, 0, z), [
+        const results = spatialHashGrid.getNearbyObjects(new THREE.Vector3(x, 0, z), [
             params.cellSizeX,
             params.cellSizeZ,
         ]);
-        console.log(result);
 
-        params.status = result.length ? 'Near' : 'Not near';
+        for (let i = 0; i < cubes.children.length; i++) {
+            const cube = cubes.children[i] as THREE.Mesh<THREE.BufferGeometry, THREE.Material>;
+            cube.material = cubeMaterial;
+        }
+
+        for (let i = 0; i < results.length; i++) {
+            const result = results[i];
+            const object = result.metadata.object as unknown as THREE.Mesh<
+                THREE.BufferGeometry,
+                THREE.Material
+            >;
+            object.material = checkMaterial;
+        }
+
+        params.status = results.length ? 'Near' : 'Not near';
         positionHelper.position.set(x, 0, z);
         positionHelper.updateMatrix();
     };
@@ -160,6 +178,8 @@ const example = (): void => {
 
         // Clear everything and re-add the grid.
         group.clear();
+        cubes.clear();
+        group.add(cubes);
 
         // Setup bounds
         const bounds: Bounds = [
@@ -177,7 +197,6 @@ const example = (): void => {
         // Create N cubes and add them to the grid
         const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize * 2, cubeSize);
         cubeGeometry.translate(cubeSize / 2, 0, cubeSize / 2);
-        const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true });
 
         for (let i = 0; i < params.numOfCubes; i++) {
             const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
@@ -191,7 +210,7 @@ const example = (): void => {
             cube.updateMatrix();
             cube.updateMatrixWorld();
 
-            group.add(cube);
+            cubes.add(cube);
             spatialHashGrid.add(cube);
         }
 
