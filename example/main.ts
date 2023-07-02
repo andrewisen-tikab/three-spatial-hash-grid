@@ -31,12 +31,13 @@ const example = (): void => {
         boundsZ: 8,
         cellSizeX: 1,
         cellSizeZ: 1,
-        coneSize: 1,
-        numOfCubes: 1,
+        cubeSize: 1,
+        numOfCubes: 10,
         x: 0,
         z: 0,
         status: 'N/A',
         log: () => {},
+        reInit: () => {},
     };
 
     // Setup Stats.js
@@ -83,8 +84,14 @@ const example = (): void => {
         // Setup a positional helper
         const planeGeometry = new THREE.PlaneGeometry(params.cellSizeX, params.cellSizeZ);
         planeGeometry.translate(params.cellSizeX / 2, -params.cellSizeX / 2, 0);
-        const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        const planeMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffff00,
+            depthTest: false,
+            depthWrite: false,
+        });
+
         positionHelper = new THREE.Mesh(planeGeometry, planeMaterial);
+        positionHelper.renderOrder = 1;
         positionHelper.rotateX(-Math.PI / 2);
         positionHelper.matrixAutoUpdate = false;
         positionHelper.updateMatrix();
@@ -123,6 +130,8 @@ const example = (): void => {
             params.cellSizeX,
             params.cellSizeZ,
         ]);
+        console.log(result);
+
         params.status = result.length ? 'Near' : 'Not near';
         positionHelper.position.set(x, 0, z);
         positionHelper.updateMatrix();
@@ -133,24 +142,29 @@ const example = (): void => {
      */
     const createSpatialHashGrid = (): void => {
         // Deconstruct the params object
-        const { boundsX, boundsZ, cellSizeX, cellSizeZ, coneSize } = params;
+        const { cubeSize } = params;
 
         // Calculate the grid helper size and divisions
-        const gridHelperSize = Math.min(boundsX, boundsZ);
-        const gridHelperDivisions = gridHelperSize / Math.min(cellSizeX, cellSizeZ);
-        const deltaXHalf = boundsX / 2;
-        const deltaZHalf = boundsZ / 2;
+        let gridHelperSize = Math.min(params.boundsX, params.boundsZ);
 
-        // if ((gridHelperSize / params.cellSizeX) % 2 !== 0)
-        //     throw new Error('gridHelperSize / params.cellSizeX must be even');
+        if ((gridHelperSize / params.cellSizeX) % 2 !== 0) {
+            console.error('gridHelperSize / params.cellSizeX must be even');
+            ++params.boundsX;
+            ++params.boundsZ;
+            gridHelperSize = Math.min(params.boundsX, params.boundsZ);
+        }
+
+        const gridHelperDivisions = gridHelperSize / params.cellSizeX;
+        const deltaXHalf = params.boundsX / 2;
+        const deltaZHalf = params.boundsZ / 2;
 
         // Clear everything and re-add the grid.
         group.clear();
 
         // Setup bounds
         const bounds: Bounds = [
-            [-boundsX / 2, -boundsZ / 2],
-            [boundsX / 2, boundsZ / 2],
+            [-params.boundsX / 2, -params.boundsZ / 2],
+            [params.boundsX / 2, params.boundsZ / 2],
         ];
 
         spatialHashGrid = new ThreeSpatialHashGrid(
@@ -158,34 +172,27 @@ const example = (): void => {
             [gridHelperDivisions, gridHelperDivisions],
             true,
         );
-        group.add(spatialHashGrid.group);
+        // group.add(spatialHashGrid.group);
 
-        // Create N cones and add them to the grid
-        const coneGeometry = new THREE.ConeGeometry(coneSize / 2, coneSize * 2, 4, 1);
-        coneGeometry.translate(coneSize / 2, 0, coneSize / 2);
-        const coneMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true });
-        const coneBBColor = new THREE.Color(0xffff00);
+        // Create N cubes and add them to the grid
+        const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize * 2, cubeSize);
+        cubeGeometry.translate(cubeSize / 2, 0, cubeSize / 2);
+        const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true });
 
         for (let i = 0; i < params.numOfCubes; i++) {
-            const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+            const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-            cone.position.x = Math.floor(Math.random() * gridHelperSize);
-            cone.position.y = (coneSize * 2) / 2;
-            cone.position.z = Math.floor(Math.random() * gridHelperSize);
+            cube.position.x = Math.floor(Math.random() * gridHelperSize);
+            cube.position.y = (cubeSize * 2) / 2;
+            cube.position.z = Math.floor(Math.random() * gridHelperSize);
 
             // TODO: Fix
-            // cone.matrixAutoUpdate = false;
-            cone.updateMatrix();
-            cone.updateMatrixWorld();
+            // cube.matrixAutoUpdate = false;
+            cube.updateMatrix();
+            cube.updateMatrixWorld();
 
-            group.add(cone);
-            spatialHashGrid.add(cone);
-
-            const box = new THREE.Box3();
-            box.setFromObject(cone);
-            const helper = new THREE.Box3Helper(box, coneBBColor);
-
-            group.add(helper);
+            group.add(cube);
+            spatialHashGrid.add(cube);
         }
 
         // Everything ok, lets update the camera position
@@ -201,7 +208,7 @@ const example = (): void => {
         group.add(gridHelper);
 
         // Create axes
-        const axesHelper = new THREE.AxesHelper(boundsX * 2);
+        const axesHelper = new THREE.AxesHelper(params.boundsX * 2);
         axesHelper.setColors(
             new THREE.Color(0xff0000),
             new THREE.Color(0x00ff00),
@@ -237,30 +244,26 @@ const example = (): void => {
 
     // Finally, setup the GUI
     configFolder
-        .add(params, 'boundsX', 1, 100, 1)
+        .add(params, 'boundsX', 1, 1_000, 1)
         .name('Bounds, X')
         .onChange((value: number) => {
             params.boundsZ = value;
-            createSpatialHashGrid();
         });
-    configFolder.add(params, 'boundsZ', 1, 100, 1).name('Bounds, Z').disable().listen();
+    configFolder.add(params, 'boundsZ', 1, 1_000, 1).name('Bounds, Z').disable().listen();
     configFolder
         .add(params, 'cellSizeX', 1, 10, 1)
         .name('Cell size, X')
         .onChange((value: number) => {
             params.cellSizeZ = value;
-            createSpatialHashGrid();
-        });
+        })
+        .listen();
     configFolder.add(params, 'cellSizeZ', 1, 10, 1).name('Cell size, Z').disable().listen();
-    configFolder
-        .add(params, 'coneSize', 1, 10, 1)
-        .name('Cone size (radius)')
-        .onChange(createSpatialHashGrid);
-
-    configFolder
-        .add(params, 'numOfCubes', 1, 100, 1)
-        .name('Number of cubes')
-        .onChange(createSpatialHashGrid);
+    configFolder.add(params, 'cubeSize', 1, 10, 1).name('Cube size (radius)');
+    configFolder.add(params, 'numOfCubes', 1, 100_000, 1).name('Number of cubes');
+    configFolder.add(params, 'reInit').name('Reinitialize SpatialHashGrid');
+    params.reInit = () => {
+        createSpatialHashGrid();
+    };
 };
 
 // Crate a new example and run it
