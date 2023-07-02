@@ -27,16 +27,17 @@ const example = (): void => {
     let checkFolder: GUI;
 
     const params = {
-        boundsX: 8,
-        boundsZ: 8,
+        boundsX: 6,
+        boundsZ: 6,
         cellSizeX: 1,
         cellSizeZ: 1,
         cubeSize: 1,
-        numOfCubes: 1,
+        numOfCubes: 8,
         x: 0,
         z: 0,
         status: 'N/A',
         log: () => {},
+        reInit: () => {},
     };
 
     // Setup Stats.js
@@ -147,8 +148,11 @@ const example = (): void => {
         const deltaXHalf = boundsX / 2;
         const deltaZHalf = boundsZ / 2;
 
-        // if ((gridHelperSize / params.cellSizeX) % 2 !== 0)
-        //     throw new Error('gridHelperSize / params.cellSizeX must be even');
+        if ((gridHelperSize / params.cellSizeX) % 2 !== 0) {
+            console.error('gridHelperSize / params.cellSizeX must be even');
+            ++params.cellSizeX;
+            ++params.cellSizeZ;
+        }
 
         // Clear everything and re-add the grid.
         group.clear();
@@ -240,7 +244,6 @@ const example = (): void => {
         .name('Bounds, X')
         .onChange((value: number) => {
             params.boundsZ = value;
-            createSpatialHashGrid();
         });
     configFolder.add(params, 'boundsZ', 1, 1_000, 1).name('Bounds, Z').disable().listen();
     configFolder
@@ -248,18 +251,15 @@ const example = (): void => {
         .name('Cell size, X')
         .onChange((value: number) => {
             params.cellSizeZ = value;
-            createSpatialHashGrid();
-        });
+        })
+        .listen();
     configFolder.add(params, 'cellSizeZ', 1, 10, 1).name('Cell size, Z').disable().listen();
-    configFolder
-        .add(params, 'cubeSize', 1, 10, 1)
-        .name('Cube size (radius)')
-        .onChange(createSpatialHashGrid);
-
-    configFolder
-        .add(params, 'numOfCubes', 1, 100_000, 1)
-        .name('Number of cubes')
-        .onChange(createSpatialHashGrid);
+    configFolder.add(params, 'cubeSize', 1, 10, 1).name('Cube size (radius)');
+    configFolder.add(params, 'numOfCubes', 1, 100_000, 1).name('Number of cubes');
+    configFolder.add(params, 'reInit').name('Reinitialize SpatialHashGrid');
+    params.reInit = () => {
+        createSpatialHashGrid();
+    };
 };
 
 // Crate a new example and run it
