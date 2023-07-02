@@ -12,6 +12,8 @@ Heavily inspired by:
 
 ## Example
 
+![Example](./resources/example.gif)
+
 [https://andrewisen-tikab.github.io/three-spatial-hash-grid/example/](https://andrewisen-tikab.github.io/three-spatial-hash-grid/example/)
 
 ## Usage
