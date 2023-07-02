@@ -173,7 +173,8 @@ const example = (): void => {
             cone.position.y = (coneSize * 2) / 2;
             cone.position.z = Math.floor(Math.random() * gridHelperSize);
 
-            cone.matrixAutoUpdate = false;
+            // TODO: Fix
+            // cone.matrixAutoUpdate = false;
             cone.updateMatrix();
             cone.updateMatrixWorld();
 
