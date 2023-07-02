@@ -173,7 +173,8 @@ const example = (): void => {
             cone.position.y = (coneSize * 2) / 2;
             cone.position.z = Math.floor(Math.random() * gridHelperSize);
 
-            cone.matrixAutoUpdate = false;
+            // TODO: Fix
+            // cone.matrixAutoUpdate = false;
             cone.updateMatrix();
             cone.updateMatrixWorld();
 
@@ -183,7 +184,7 @@ const example = (): void => {
             const box = new THREE.Box3();
             box.setFromObject(cone);
             const helper = new THREE.Box3Helper(box, coneBBColor);
-            helper.matrixAutoUpdate = false;
+
             group.add(helper);
         }
 
