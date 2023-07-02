@@ -163,8 +163,8 @@ const example = (): void => {
 
         // Setup bounds
         const bounds: Bounds = [
-            [-params.boundsX / 2, -params.boundsZ / 2],
-            [params.boundsX / 2, params.boundsZ / 2],
+            [0, 0],
+            [params.boundsX, params.boundsZ],
         ];
 
         spatialHashGrid = new ThreeSpatialHashGrid(
@@ -172,7 +172,7 @@ const example = (): void => {
             [gridHelperDivisions, gridHelperDivisions],
             true,
         );
-        // group.add(spatialHashGrid.group);
+        group.add(spatialHashGrid.group);
 
         // Create N cubes and add them to the grid
         const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize * 2, cubeSize);

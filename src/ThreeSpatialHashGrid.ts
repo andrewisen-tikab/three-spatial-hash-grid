@@ -45,6 +45,7 @@ export default class ThreeSpatialHashGrid extends SpatialHashGrid {
     private debug(bounds: Bounds, dimensions: Dimensions) {
         const size = bounds[1][0] - bounds[0][0];
         const divisions = dimensions[0];
+
         const gridHelper = new THREE.GridHelper(
             size,
             divisions,
@@ -53,8 +54,8 @@ export default class ThreeSpatialHashGrid extends SpatialHashGrid {
         );
 
         gridHelper.position.y = 0.1;
-        gridHelper.position.x = -bounds[0][0];
-        gridHelper.position.z = -bounds[0][1];
+        gridHelper.position.x = bounds[1][0] / 2;
+        gridHelper.position.z = bounds[1][1] / 2;
         gridHelper.matrixAutoUpdate = false;
         gridHelper.updateMatrix();
 
