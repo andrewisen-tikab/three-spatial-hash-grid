@@ -183,7 +183,7 @@ const example = (): void => {
             const box = new THREE.Box3();
             box.setFromObject(cone);
             const helper = new THREE.Box3Helper(box, coneBBColor);
-            helper.matrixAutoUpdate = false;
+
             group.add(helper);
         }
 
