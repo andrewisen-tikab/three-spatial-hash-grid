@@ -27,12 +27,12 @@ const example = (): void => {
     let checkFolder: GUI;
 
     const params = {
-        boundsX: 6,
-        boundsZ: 6,
+        boundsX: 8,
+        boundsZ: 8,
         cellSizeX: 1,
         cellSizeZ: 1,
         cubeSize: 1,
-        numOfCubes: 8,
+        numOfCubes: 10,
         x: 0,
         z: 0,
         status: 'N/A',
@@ -130,6 +130,8 @@ const example = (): void => {
             params.cellSizeX,
             params.cellSizeZ,
         ]);
+        console.log(result);
+
         params.status = result.length ? 'Near' : 'Not near';
         positionHelper.position.set(x, 0, z);
         positionHelper.updateMatrix();
@@ -140,27 +142,29 @@ const example = (): void => {
      */
     const createSpatialHashGrid = (): void => {
         // Deconstruct the params object
-        const { boundsX, boundsZ, cellSizeX, cellSizeZ, cubeSize } = params;
+        const { cubeSize } = params;
 
         // Calculate the grid helper size and divisions
-        const gridHelperSize = Math.min(boundsX, boundsZ);
-        const gridHelperDivisions = gridHelperSize / Math.min(cellSizeX, cellSizeZ);
-        const deltaXHalf = boundsX / 2;
-        const deltaZHalf = boundsZ / 2;
+        let gridHelperSize = Math.min(params.boundsX, params.boundsZ);
 
         if ((gridHelperSize / params.cellSizeX) % 2 !== 0) {
             console.error('gridHelperSize / params.cellSizeX must be even');
-            ++params.cellSizeX;
-            ++params.cellSizeZ;
+            ++params.boundsX;
+            ++params.boundsZ;
+            gridHelperSize = Math.min(params.boundsX, params.boundsZ);
         }
+
+        const gridHelperDivisions = gridHelperSize / params.cellSizeX;
+        const deltaXHalf = params.boundsX / 2;
+        const deltaZHalf = params.boundsZ / 2;
 
         // Clear everything and re-add the grid.
         group.clear();
 
         // Setup bounds
         const bounds: Bounds = [
-            [-boundsX / 2, -boundsZ / 2],
-            [boundsX / 2, boundsZ / 2],
+            [-params.boundsX / 2, -params.boundsZ / 2],
+            [params.boundsX / 2, params.boundsZ / 2],
         ];
 
         spatialHashGrid = new ThreeSpatialHashGrid(
@@ -168,7 +172,7 @@ const example = (): void => {
             [gridHelperDivisions, gridHelperDivisions],
             true,
         );
-        group.add(spatialHashGrid.group);
+        // group.add(spatialHashGrid.group);
 
         // Create N cubes and add them to the grid
         const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize * 2, cubeSize);
@@ -204,7 +208,7 @@ const example = (): void => {
         group.add(gridHelper);
 
         // Create axes
-        const axesHelper = new THREE.AxesHelper(boundsX * 2);
+        const axesHelper = new THREE.AxesHelper(params.boundsX * 2);
         axesHelper.setColors(
             new THREE.Color(0xff0000),
             new THREE.Color(0x00ff00),
