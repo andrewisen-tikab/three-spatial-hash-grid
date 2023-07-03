@@ -169,7 +169,7 @@ export default class SpatialHashGrid {
     /**
      * Update client.
      */
-    protected updateClient(client: Client): void {
+    public updateClient(client: Client): void {
         const {
             position: [x, y],
             dimensions: [w, h],
