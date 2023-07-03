@@ -22,6 +22,7 @@ const example = (): void => {
     let scene: THREE.Scene;
     let group: THREE.Group;
     let cubes: THREE.Group = new THREE.Group();
+    let gridHelperSize: number;
 
     let renderer: THREE.WebGLRenderer;
     let positionHelper: THREE.Mesh;
@@ -38,6 +39,7 @@ const example = (): void => {
         cellSizeZ: 1,
         cubeSize: 1,
         numOfCubes: 40,
+        randomize: true,
         x: 0,
         z: 0,
         status: 'N/A',
@@ -114,9 +116,37 @@ const example = (): void => {
             renderer.render(scene, camera);
         };
 
-        const animate = (): void => {
+        // Setup cube randomize
+        const cubeUpdateInterval = 2_000;
+        let previousTime = 0;
+
+        const updateCubes = (): void => {
+            for (let i = 0; i < spatialHashGrid.clients.length; i++) {
+                const client = spatialHashGrid.clients[i];
+                const cube = client.metadata.object as unknown as THREE.Mesh;
+                const [x, z] = setRandomPosition(cube);
+                client.position[0] = x;
+                client.position[1] = z;
+                spatialHashGrid.updateClient(client);
+            }
+        };
+
+        const animate = (currentTime: number = 0): void => {
+            // Camera controls
             const delta = clock.getDelta();
             cameraControls.update(delta);
+
+            // Cubes randomize
+            const deltaTime = currentTime - previousTime;
+            if (deltaTime >= cubeUpdateInterval) {
+                if (params.randomize) {
+                    updateCubes();
+                    check();
+                }
+                previousTime = currentTime;
+            }
+
+            // Render
             requestAnimationFrame(animate);
             stats.update();
             render();
@@ -155,6 +185,17 @@ const example = (): void => {
         positionHelper.updateMatrix();
     };
 
+    const setRandomPosition = (cube: THREE.Mesh) => {
+        const x = Math.floor(Math.random() * gridHelperSize);
+        const z = Math.floor(Math.random() * gridHelperSize);
+        cube.position.x = x;
+        cube.position.y = (params.cubeSize * 2) / 2;
+        cube.position.z = z;
+        cube.updateMatrix();
+        cube.updateMatrixWorld();
+        return [x, z];
+    };
+
     /**
      * Create a new spatial hash grid based on the provided {@link params}, and add it to the scene.
      */
@@ -163,7 +204,7 @@ const example = (): void => {
         const { cubeSize } = params;
 
         // Calculate the grid helper size and divisions
-        let gridHelperSize = Math.min(params.boundsX, params.boundsZ);
+        gridHelperSize = Math.min(params.boundsX, params.boundsZ);
 
         if ((gridHelperSize / params.cellSizeX) % 2 !== 0) {
             console.error('gridHelperSize / params.cellSizeX must be even');
@@ -200,15 +241,7 @@ const example = (): void => {
 
         for (let i = 0; i < params.numOfCubes; i++) {
             const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-
-            cube.position.x = Math.floor(Math.random() * gridHelperSize);
-            cube.position.y = (cubeSize * 2) / 2;
-            cube.position.z = Math.floor(Math.random() * gridHelperSize);
-
-            // TODO: Fix
-            // cube.matrixAutoUpdate = false;
-            cube.updateMatrix();
-            cube.updateMatrixWorld();
+            setRandomPosition(cube);
 
             cubes.add(cube);
             spatialHashGrid.add(cube);
@@ -279,6 +312,7 @@ const example = (): void => {
     configFolder.add(params, 'cellSizeZ', 1, 10, 1).name('Cell size, Z').disable().listen();
     configFolder.add(params, 'cubeSize', 1, 10, 1).name('Cube size (radius)');
     configFolder.add(params, 'numOfCubes', 1, 100_000, 1).name('Number of cubes');
+    configFolder.add(params, 'randomize').name('Randomize cubes position');
     configFolder.add(params, 'reInit').name('Reinitialize SpatialHashGrid');
     params.reInit = () => {
         createSpatialHashGrid();
