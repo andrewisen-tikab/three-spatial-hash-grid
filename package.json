@@ -2,6 +2,7 @@
     "name": "three-spatial-hash-grid",
     "version": "0.0.3",
     "type": "module",
+    "main": "dist/three-spatial-hash-grid.js",
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
