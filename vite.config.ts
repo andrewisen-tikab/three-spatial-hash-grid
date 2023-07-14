@@ -17,5 +17,5 @@ export default defineConfig({
             external: ['three'],
         },
     },
-    plugins: [dts()],
+    plugins: [dts({ insertTypesEntry: true })],
 });
