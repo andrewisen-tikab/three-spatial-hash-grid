@@ -1,6 +1,6 @@
 {
     "name": "three-spatial-hash-grid",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "type": "module",
     "main": "dist/three-spatial-hash-grid.js",
     "license": "MIT",
