@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Bounds, Client, Dimensions, SpatialObject, Vector2 } from './types';
 import SpatialHashGrid from './SpatialHashGrid';
+import { GridHelper } from './GridHelper';
 
 const _position = /* @__PURE__ */ new THREE.Vector3();
 let _client: Client; /* @__PURE__ */
@@ -34,34 +35,17 @@ export default class ThreeSpatialHashGrid extends SpatialHashGrid {
         super(bounds, dimensions);
         this.clients = [];
         this.group = new THREE.Group();
-        if (debug) this.debug(bounds, dimensions);
+        if (debug) this.debug(bounds);
     }
 
     /**
      * Create a {@link THREE.GridHelper | GridHelper} to display the grid.
      * @param bounds The min/max the grid will operate on. I.e. if the world goes from `-1000, -1000` to `1000, 1000`, then this should be `[-1000, -1000], [1000, 1000]`.
-     * @param dimensions How **many** cells along each dimensional axis. I.e. if the world is 100 units wide and we have 5 cells, then each cell will span `100/5=20 units`.
      */
-    private debug(bounds: Bounds, dimensions: Dimensions) {
-        const size = bounds[1][0] - bounds[0][0];
-        const divisions = dimensions[0];
-
-        const gridHelper = new THREE.GridHelper(
-            size,
-            divisions,
-            new THREE.Color(0xffffff),
-            new THREE.Color(0xff0000),
-        );
-
-        gridHelper.position.y = 0.1;
-        gridHelper.position.x = bounds[1][0] / 2;
-        gridHelper.position.z = bounds[1][1] / 2;
-        gridHelper.matrixAutoUpdate = false;
-        gridHelper.updateMatrix();
-
-        const material = gridHelper.material as THREE.Material;
-        material.opacity = 0.5;
-        material.transparent = true;
+    private debug(bounds: Bounds) {
+        const x = bounds[1][0] - bounds[0][0];
+        const y = bounds[1][1] - bounds[0][1];
+        const gridHelper = new GridHelper(x, y);
 
         this.group.add(gridHelper);
     }
